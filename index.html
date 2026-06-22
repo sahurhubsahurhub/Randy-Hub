@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Randy Hub V7 Ultimate</title>
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --o:#ff9800;
+  --bg:#0a0a0a;
+  --panel:#151515cc;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+  background:radial-gradient(circle at top,#1a1a1a,#000);
+  color:#fff;
+  font-family:Rajdhani,sans-serif;
+  overflow:hidden;
+}
+
+/* PARTICLES */
+.particle{
+  position:fixed;
+  width:6px;height:6px;
+  background:var(--o);
+  border-radius:50%;
+  opacity:.4;
+  animation:floatUp linear infinite;
+  filter:blur(1px);
+  pointer-events:none;
+}
+@keyframes floatUp{
+  from{transform:translateY(110vh) scale(.4);opacity:.2}
+  to{transform:translateY(-10vh) scale(1);opacity:.7}
+}
+
+/* HEADER */
+header{
+  padding:18px;
+  text-align:center;
+  font-size:42px;
+  font-family:Orbitron,sans-serif;
+  color:var(--o);
+  text-shadow:0 0 25px var(--o),0 0 50px var(--o);
+  letter-spacing:3px;
+  background:#00000040;
+  backdrop-filter:blur(6px);
+  border-bottom:1px solid #ffffff15;
+  position:relative;
+}
+#autoIndicator{
+  position:absolute;
+  right:20px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:16px;
+  padding:6px 12px;
+  border-radius:20px;
+  background:#111;
+  border:1px solid #ffffff30;
+}
+#autoIndicator.on{
+  background:#1b1b1b;
+  border-color:var(--o);
+  box-shadow:0 0 12px var(--o);
+  color:var(--o);
+}
+
+/* LAYOUT */
+.app{
+  display:grid;
+  grid-template-columns:260px 1fr;
+  height:calc(100vh - 90px);
+  position:relative;
+  z-index:5;
+}
+
+.side{
+  background:#0d0d0d80;
+  backdrop-filter:blur(8px);
+  padding:14px;
+  border-right:1px solid #ffffff15;
+}
+
+/* TABS */
+.tab{
+  padding:14px;
+  margin:8px 0;
+  background:#1a1a1a;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:20px;
+  transition:.25s;
+  text-align:center;
+  border:1px solid #ffffff10;
+}
+.tab:hover{
+  background:#262626;
+  transform:translateX(4px);
+}
+.tab.active{
+  background:var(--o);
+  color:#000;
+  font-weight:700;
+  box-shadow:0 0 15px var(--o);
+}
+
+/* MAIN */
+.main{
+  padding:18px;
+  overflow:auto;
+}
+.page{display:none;animation:fade .3s ease}
+.page.active{display:block}
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* PANELS */
+.panel{
+  background:#151515cc;
+  border:1px solid #ffffff15;
+  border-radius:18px;
+  padding:16px;
+  margin-bottom:16px;
+  backdrop-filter:blur(8px);
+  box-shadow:0 0 20px #00000060;
+}
+
+/* STATS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:12px;
+  text-align:center;
+  font-size:18px;
+}
+
+/* CARDS */
+.cardgrid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
+  gap:14px;
+}
+.card{
+  background:#1b1b1b;
+  padding:10px;
+  border-radius:14px;
+  transition:.25s;
+  border:2px solid #333;
+  text-align:center;
+  animation:cardIn .35s ease;
+}
+@keyframes cardIn{
+  from{opacity:0;transform:scale(.9) translateY(8px)}
+  to{opacity:1;transform:scale(1) translateY(0)}
+}
+.card:hover{
+  transform:translateY(-6px) scale(1.03);
+  box-shadow:0 0 20px #000;
+}
+.card img{
+  width:100%;
+  height:120px;
+  object-fit:cover;
+  border-radius:10px;
+}
+
+/* Rarity */
+.common{border-color:gray}
+.rare{border-color:deepskyblue;box-shadow:0 0 12px rgba(0,191,255,.5)}
+.epic{border-color:violet;box-shadow:0 0 12px rgba(238,130,238,.5)}
+.legendary{border-color:gold;box-shadow:0 0 16px rgba(255,215,0,.7)}
+
+/* Mutations */
+.golden{animation:goldPulse 2s infinite alternate}
+@keyframes goldPulse{to{filter:brightness(1.5)}}
+.rainbow{animation:rainbow 3s linear infinite}
+@keyframes rainbow{to{filter:hue-rotate(360deg)}}
+.corrupted{animation:shake .4s infinite}
+@keyframes shake{50%{transform:translateX(2px)}}
+
+/* BUTTONS */
+.btn{
+  padding:12px 18px;
+  border:none;
+  background:linear-gradient(90deg,var(--o),#ffcc80);
+  color:#000;
+  border-radius:12px;
+  cursor:pointer;
+  font-size:18px;
+  font-weight:700;
+  margin:4px;
+  transition:.2s;
+}
+.btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 0 15px var(--o);
+}
+
+/* BARS */
+.bar{
+  height:20px;
+  background:#222;
+  border-radius:20px;
+  overflow:hidden;
+  margin-top:6px;
+}
+.fill{
+  height:100%;
+  width:0;
+  background:linear-gradient(90deg,var(--o),#ffd27a);
+  transition:width .15s;
+}
+
+/* OVERLAY + MODAL */
+.overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:#000000d0;
+  z-index:50;
+  align-items:center;
+  justify-content:center;
+  font-size:44px;
+  color:var(--o);
+  text-shadow:0 0 20px var(--o);
+}
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  align-items:center;
+  justify-content:center;
+  z-index:60;
+}
+.box{
+  background:#111111dd;
+  border:2px solid var(--o);
+  padding:24px;
+  border-radius:18px;
+  width:480px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 25px #000;
+  text-align:center;
+}
+.badge{
+  display:inline-block;
+  background:#222;
+  padding:6px 12px;
+  border-radius:20px;
+  margin:4px;
+  font-size:16px;
+}
+
+/* NOTIFICATIONS */
+#notifyContainer {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 9999;
+}
+.notify {
+  background: #1a1a1acc;
+  border-left: 5px solid var(--o);
+  padding: 14px 18px;
+  border-radius: 10px;
+  color: white;
+  font-size: 18px;
+  min-width: 260px;
+  max-width: 340px;
+  box-shadow: 0 0 15px #000;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateX(40px);
+  animation: notifyIn .4s forwards, notifyOut .4s forwards 3.5s;
+}
+@keyframes notifyIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes notifyOut {
+  to { opacity: 0; transform: translateX(40px); }
+}
+
+/* FLOATING COINS */
+.coinFloat{
+  position:fixed;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  color:var(--o);
+  font-size:26px;
+  font-weight:700;
+  text-shadow:0 0 12px var(--o);
+  animation:coinRise .8s ease-out forwards;
+  pointer-events:none;
+}
+@keyframes coinRise{
+  from{opacity:1;transform:translate(-50%,-50%)}
+  to{opacity:0;transform:translate(-50%,-80%)}
+}
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<script>
+for(let i=0;i<45;i++){
+  const p=document.createElement("div");
+  p.className="particle";
+  p.style.left=Math.random()*100+"vw";
+  p.style.animationDuration=(6+Math.random()*6)+"s";
+  p.style.animationDelay=(Math.random()*5)+"s";
+  document.body.appendChild(p);
+}
+</script>
+
+<header>
+  RANDY HUB V7 ULTIMATE
+  <span id="autoIndicator">AUTO: OFF</span>
+</header>
+
+<div class="app">
+  <div class="side">
+    <div class="tab active" onclick="page('collection',this)">Collection</div>
+    <div class="tab" onclick="page('market',this)">Marketplace</div>
+    <div class="tab" onclick="page('research',this)">Research</div>
+    <div class="tab" onclick="page('stats',this)">Statistics</div>
+    <div class="tab" onclick="page('ach',this)">Achievements</div>
+  </div>
+
+  <div class="main">
+
+    <!-- COLLECTION -->
+    <div id="collection" class="page active">
+      <div class="panel">
+        <div class="stats">
+          <div>Coins<br><span id="coins"></span></div>
+          <div>Videos<br><span id="videos"></span></div>
+          <div>Prestige<br><span id="prestige"></span>x</div>
+          <div>Best Sale<br><span id="best"></span></div>
+          <div>Luck<br><span id="luck"></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <button class="btn" id="scanBtn" onclick="scan()">Scan Web</button>
+        <div class="bar"><div id="scanFill" class="fill"></div></div><br>
+        <button class="btn" id="buyerBtn" onclick="findBuyer()">Find Buyer</button>
+        <div class="bar"><div id="buyerFill" class="fill"></div></div><br>
+        <button class="btn" onclick="claimDaily()">Claim Daily Reward</button>
+        <button class="btn" onclick="prestige()">Prestige (10,000 Coins)</button>
+      </div>
+
+      <div class="panel">
+        <div id="cards" class="cardgrid"></div>
+      </div>
+    </div>
+
+    <!-- MARKET -->
+    <div id="market" class="page">
+      <div class="panel"><h2>Buyer Reputation</h2><div id="buyerRep"></div></div>
+      <div class="panel"><h2>Recent Sales</h2><div id="sales"></div></div>
+      <div class="panel">
+        <span class="badge">Gaming +40%</span>
+        <span class="badge">Memes +20%</span>
+        <span class="badge">Animals -10%</span>
+      </div>
+    </div>
+
+    <!-- RESEARCH -->
+    <div id="research" class="page">
+      <div class="panel">
+        <button class="btn" onclick="up('luck',100)">Luck +2% (100c)</button>
+        <button class="btn" onclick="up('speed',150)">Speed +5% (150c)</button>
+        <button class="btn" onclick="up('gain',250)">Coin Gain +20% (250c)</button>
+        <button class="btn" onclick="up('auto',1000)">Buy Auto Scanner (1000c)</button>
+      </div>
+      <div class="panel">
+        <button class="btn" onclick="rollTrait()">Roll Trait (500c)</button>
+        <p>Current Trait: <span id="traitName"></span></p>
+        <p>Trait Multiplier: <span id="traitMult"></span>x</p>
+      </div>
+      <div class="panel">
+        <button class="btn" onclick="toggleAuto()">Toggle Auto Scan</button>
+        <p>Auto Scan: <span id="autoStatus"></span></p>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div id="stats" class="page">
+      <div class="panel">
+        Lifetime Scans: <span id="s1"></span><br>
+        Lifetime Sales: <span id="s2"></span><br>
+        Highest Offer: <span id="s3"></span><br>
+        Collection Bonus: <span id="setbonus"></span>%<br>
+        Total Luck Bonus: <span id="luckBonus"></span>%<br>
+        Speed Bonus: <span id="speedDisplay"></span><br>
+        Coin Gain Bonus: <span id="gainDisplay"></span><br>
+      </div>
+    </div>
+
+    <!-- ACHIEVEMENTS -->
+    <div id="ach" class="page">
+      <div class="panel"><div id="achievements"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="overlay" class="overlay">Scanning For Buyers.</div>
+
+<div id="modal" class="modal">
+  <div class="box">
+    <h2 id="buyerName"></h2>
+    <div id="offerBox"></div>
+    <button class="btn" onclick="accept()">Accept</button>
+    <button class="btn" onclick="reroll()">Find Another Buyer</button>
+    <button class="btn" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div id="notifyContainer"></div>
+
+<script>
+const imgs=[
+  "https://i.imgur.com/bMEEjcV.png",
+  "https://i.imgur.com/fK5dXpV.png",
+  "https://i.imgur.com/Ov05PUC.png",
+  "https://i.imgur.com/7Kv62zQ.png",
+  "https://i.imgur.com/TdPb889.png"
+];
+const buyers=["CoinCollector(A+)","VideoWhale(S)","MarketGuru(B+)","RandyFan92(A)"];
+
+let g=JSON.parse(localStorage.rhv7||'{"coins":0,"prestige":1,"luck":0,"speed":0,"gain":0,"auto":0,"autoEnabled":false,"best":0,"scans":0,"sales":0,"ach":[],"history":[],"col":[],"daily":0,"last":0,"trait":"None","traitMult":1}');
+let current=null;
+
+const now=Date.now();
+if(g.last){
+  let mins=Math.min(720,Math.floor((now-g.last)/60000));
+  g.coins+=mins*5*g.prestige;
+}
+g.last=now;
+
+function save(){
+  g.last=Date.now();
+  localStorage.rhv7=JSON.stringify(g);
+}
+
+function notify(msg) {
+  let box = document.createElement("div");
+  box.className = "notify";
+  box.innerHTML = msg;
+  notifyContainer.appendChild(box);
+  setTimeout(() => {
+    box.remove();
+  }, 4000);
+}
+
+function floatCoins(amount){
+  const c=document.createElement("div");
+  c.className="coinFloat";
+  c.textContent="+"+amount;
+  document.body.appendChild(c);
+  setTimeout(()=>c.remove(),800);
+}
+
+function page(id,e){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  e.classList.add('active');
+}
+
+function update(){
+  coins.textContent=Math.floor(g.coins);
+  videos.textContent=g.col.length;
+  prestige.textContent=g.prestige;
+  best.textContent=g.best;
+
+  luck.textContent = g.luck * 2 + "%";
+  luckBonus.textContent = g.luck * 2;
+  speedDisplay.textContent = g.speed * 5 + "%";
+  gainDisplay.textContent = (g.gain * 20) + "%";
+
+  s1.textContent=g.scans;
+  s2.textContent=g.sales;
+  s3.textContent=g.best;
+
+  buyerRep.textContent=buyers.join(" • ");
+  sales.innerHTML=g.history.slice(-15).reverse().join("<br>")||"None";
+  achievements.textContent=g.ach.join(", ")||"None";
+
+  let leg=g.col.filter(x=>x.r=="Legendary").length;
+  setbonus.textContent=leg*5;
+
+  traitName.textContent = g.trait;
+  traitMult.textContent = g.traitMult;
+
+  autoStatus.textContent = g.auto === 1
+    ? (g.autoEnabled ? "ON" : "OFF")
+    : "Locked";
+
+  autoIndicator.textContent = "AUTO: " + (g.auto === 1 && g.autoEnabled ? "ON" : "OFF");
+  autoIndicator.className = g.auto === 1 && g.autoEnabled ? "on" : "";
+
+  cards.innerHTML="";
+  g.col.forEach(v=>{
+    cards.innerHTML+=`<div class="card ${v.r.toLowerCase()} ${v.m}">
+      <img src="${v.i}">
+      <b>${v.m?v.m.toUpperCase()+" ":""}${v.r}</b><br>
+      💰${v.v}<br>⭐ Lv.${v.lvl}
+    </div>`;
+  });
+
+  save();
+}
+
+function rarity(){
+  let r=Math.random()*100-g.luck*2;
+  if(r<2)return["Legendary",1500];
+  if(r<10)return["Epic",500];
+  if(r<30)return["Rare",150];
+  return["Common",50];
+}
+
+function mutation(){
+  let r=Math.random();
+  if(r<.02)return"golden";
+  if(r<.04)return"rainbow";
+  if(r<.05)return"corrupted";
+  return"";
+}
+
+let scanning=false;
+function scan(){
+  if(scanning)return;
+  scanning=true;
+  let p=0;
+  let t=setInterval(()=>{
+    p+=2;
+    scanFill.style.width=p+"%";
+    if(p>=100){
+      clearInterval(t);
+      scanFill.style.width="0%";
+      scanning=false;
+      let [r,v]=rarity();
+      let m=mutation();
+      let mult=m=="golden"?5:m=="rainbow"?10:m=="corrupted"?20:1;
+      let mutText = m ? m.charAt(0).toUpperCase()+m.slice(1)+" " : "";
+      g.col.push({r,v:v*mult,i:imgs[Math.floor(Math.random()*imgs.length)],m,lvl:1});
+      g.scans++;
+      if(g.scans>=1&&!g.ach.includes("First Scan"))g.ach.push("First Scan");
+      if(g.scans>=50&&!g.ach.includes("Collector"))g.ach.push("Collector");
+      notify("📡 Scan complete: "+mutText+r+" video unlocked");
+      update();
+    }
+  },Math.max(15,60-g.speed*3));
+}
+
+function buildOffer(){
+  let idx=Math.floor(Math.random()*g.col.length);
+  let item=g.col[idx];
+  let offer=Math.floor(item.v*(0.5+Math.random()*2)*(1+g.gain*.2)*g.prestige);
+  current={idx,offer};
+  buyerName.textContent=buyers[Math.floor(Math.random()*buyers.length)];
+  let q=offer<item.v?"Bad":offer<item.v*1.5?"Fair":offer<item.v*2?"Great":"Amazing";
+  offerBox.innerHTML = `
+    <img src="${item.i}" style="width:100%">
+    <p>Rarity: ${item.r}</p>
+    <p>Base Value: ${item.v}</p>
+    <p>Offer: ${offer}</p>
+    <p>Quality: ${q}</p>
+  `;
+}
+
+function findBuyer(){
+  if(!g.col.length){
+    notify("❗ Collect videos first");
+    return;
+  }
+  overlay.style.display="flex";
+  let d=1;
+  let anim=setInterval(()=>{
+    overlay.textContent="Scanning For Buyers"+".".repeat(d=d%3+1);
+  },300);
+  let p=0;
+  let t=setInterval(()=>{
+    p+=2;
+    buyerFill.style.width=p+"%";
+    if(p>=100){
+      clearInterval(t);
+      clearInterval(anim);
+      buyerFill.style.width="0%";
+      overlay.style.display="none";
+      buildOffer();
+      modal.style.display="flex";
+    }
+  },35);
+}
+
+function reroll(){buildOffer()}
+
+function accept(){
+  let gained = Math.floor(current.offer * g.traitMult);
+  g.coins+=gained;
+  g.sales++;
+  g.best=Math.max(g.best,current.offer);
+  g.history.push("Sold for "+current.offer+" (x"+g.traitMult+" trait)");
+  g.col.splice(current.idx,1);
+  notify("💵 Sold video for "+gained+" coins!");
+  floatCoins(gained);
+  closeModal();
+  update();
+}
+
+function closeModal(){
+  modal.style.display="none";
+}
+
+function up(k,c){
+  if (k === "auto" && g.auto === 1) {
+    notify("⚠️ Auto Scanner already purchased");
+    return;
+  }
+
+  if (g.coins < c) {
+    notify("⚠️ Not enough coins for upgrade");
+    return;
+  }
+
+  g.coins -= c;
+
+  if (k === "auto") {
+    g.auto = 1;
+    notify("🤖 Auto Scanner unlocked!");
+  } else {
+    g[k]++;
+    notify("⬆️ Upgrade purchased: "+k+" +1");
+  }
+
+  update();
+}
+
+function prestige(){
+  if(g.coins<10000){
+    notify("💰 You need 10,000 coins to prestige");
+    return;
+  }
+  g.coins=0;
+  g.col=[];
+  g.luck=0;
+  g.speed=0;
+  g.gain=0;
+  g.auto=0;
+  g.autoEnabled=false;
+  g.prestige++;
+  notify("🌟 Prestige increased to x"+g.prestige);
+  update();
+}
+
+function claimDaily(){
+  let day=Math.floor(Date.now()/86400000);
+  if(g.daily==day){
+    notify("📅 Daily reward already claimed");
+    return;
+  }
+  g.daily=day;
+  g.coins+=1000*g.prestige;
+  update();
+  notify("🎁 Daily reward claimed!");
+}
+
+function rollTrait() {
+  if (g.coins < 500){
+    notify("⚠️ Not enough coins — 500 required");
+    return;
+  }
+
+  g.coins -= 500;
+
+  let r = Math.random() * 100;
+  let trait = "None";
+  let mult = 1;
+
+  if (r < 1) { trait = "GODLIKE"; mult = 5; }
+  else if (r < 5) { trait = "Insane"; mult = 3; }
+  else if (r < 15) { trait = "Strong"; mult = 2; }
+  else if (r < 40) { trait = "Decent"; mult = 1.5; }
+  else { trait = "Weak"; mult = 1.2; }
+
+  g.trait = trait;
+  g.traitMult = mult;
+
+  notify("✨ New Trait: <b>" + trait + "</b> (" + mult + "x)");
+
+  update();
+}
+
+function toggleAuto(){
+  if (g.auto !== 1){
+    notify("❗ You must buy the Auto Scanner first");
+    return;
+  }
+  g.autoEnabled = !g.autoEnabled;
+  notify("🤖 Auto Scan " + (g.autoEnabled ? "Enabled" : "Disabled"));
+  update();
+}
+
+setInterval(()=>{
+  if(g.auto === 1 && g.autoEnabled && !scanning) scan();
+},2500);
+
+update();
+</script>
+</body>
+</html>
