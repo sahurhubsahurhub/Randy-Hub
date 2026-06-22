@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Randy Hub V7 Ultimate</title>
 
-<!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
@@ -309,11 +308,40 @@ header{
   from{opacity:1;transform:translate(-50%,-50%)}
   to{opacity:0;transform:translate(-50%,-80%)}
 }
+
+/* PRESTIGE UI */
+.prestige-grid{
+  display:grid;
+  grid-template-columns:1.2fr 1.2fr 1fr;
+  gap:12px;
+}
+.prestige-section-title{
+  font-size:20px;
+  margin-bottom:6px;
+  font-weight:700;
+}
+.shop-item, .tree-node, .milestone-item{
+  background:#1b1b1b;
+  border-radius:12px;
+  padding:8px 10px;
+  margin-bottom:8px;
+  border:1px solid #333;
+  font-size:15px;
+}
+.shop-item-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:4px;
+}
+.tree-node.locked{opacity:.4}
+.tree-node.unlocked{border-color:var(--o);box-shadow:0 0 10px #ff980040}
+.milestone-item.unlocked{border-color:var(--o);box-shadow:0 0 10px #ff980040}
+.milestone-label{font-weight:700}
 </style>
 </head>
 <body>
 
-<!-- PARTICLES -->
 <script>
 for(let i=0;i<45;i++){
   const p=document.createElement("div");
@@ -336,6 +364,7 @@ for(let i=0;i<45;i++){
     <div class="tab" onclick="page('market',this)">Marketplace</div>
     <div class="tab" onclick="page('research',this)">Research</div>
     <div class="tab" onclick="page('stats',this)">Statistics</div>
+    <div class="tab" onclick="page('prestige',this)">Prestige</div>
     <div class="tab" onclick="page('ach',this)">Achievements</div>
   </div>
 
@@ -359,7 +388,7 @@ for(let i=0;i<45;i++){
         <button class="btn" id="buyerBtn" onclick="findBuyer()">Find Buyer</button>
         <div class="bar"><div id="buyerFill" class="fill"></div></div><br>
         <button class="btn" onclick="claimDaily()">Claim Daily Reward</button>
-        <button class="btn" onclick="prestige()">Prestige (10,000 Coins)</button>
+        <button class="btn" onclick="doPrestige()">Prestige (10,000 Coins)</button>
       </div>
 
       <div class="panel">
@@ -400,6 +429,7 @@ for(let i=0;i<45;i++){
     <!-- STATS -->
     <div id="stats" class="page">
       <div class="panel">
+        <h2>Core Stats</h2>
         Lifetime Scans: <span id="s1"></span><br>
         Lifetime Sales: <span id="s2"></span><br>
         Highest Offer: <span id="s3"></span><br>
@@ -407,6 +437,47 @@ for(let i=0;i<45;i++){
         Total Luck Bonus: <span id="luckBonus"></span>%<br>
         Speed Bonus: <span id="speedDisplay"></span><br>
         Coin Gain Bonus: <span id="gainDisplay"></span><br>
+      </div>
+      <div class="panel">
+        <h2>Prestige Stats</h2>
+        Prestige Level: <span id="prestigeLevel"></span><br>
+        Prestige Multiplier: <span id="prestigeMult"></span>x<br>
+        Total Shards Earned: <span id="shardsTotal"></span><br>
+        Shards Available: <span id="shards"></span><br>
+        Shards Spent: <span id="shardsSpent"></span><br>
+        Rarity Bonus (Prestige): <span id="prestigeRarityBonus"></span>%<br>
+        Profit Bonus (Prestige): <span id="prestigeProfitBonus"></span>%<br>
+        Auto Bonus (Prestige): <span id="prestigeAutoBonus"></span>%<br>
+        Milestones Unlocked: <span id="prestigeMilestonesCount"></span><br>
+      </div>
+    </div>
+
+    <!-- PRESTIGE -->
+    <div id="prestige" class="page">
+      <div class="panel">
+        <h2>Prestige Overview</h2>
+        <p>Prestige resets most progress but grants <b>Shards</b>, permanent bonuses, and unlocks powerful systems.</p>
+        <p>Current Prestige: <span id="prestigeLevel2"></span> | Shards: <span id="shards2"></span></p>
+      </div>
+
+      <div class="panel prestige-grid">
+        <!-- SHOP -->
+        <div>
+          <div class="prestige-section-title">Prestige Shop</div>
+          <div id="prestigeShop"></div>
+        </div>
+
+        <!-- SKILL TREE -->
+        <div>
+          <div class="prestige-section-title">Skill Tree</div>
+          <div id="prestigeTree"></div>
+        </div>
+
+        <!-- MILESTONES -->
+        <div>
+          <div class="prestige-section-title">Milestones</div>
+          <div id="prestigeMilestones"></div>
+        </div>
       </div>
     </div>
 
@@ -442,7 +513,7 @@ const imgs=[
 ];
 const buyers=["CoinCollector(A+)","VideoWhale(S)","MarketGuru(B+)","RandyFan92(A)"];
 
-let g=JSON.parse(localStorage.rhv7||'{"coins":0,"prestige":1,"luck":0,"speed":0,"gain":0,"auto":0,"autoEnabled":false,"best":0,"scans":0,"sales":0,"ach":[],"history":[],"col":[],"daily":0,"last":0,"trait":"None","traitMult":1}');
+let g=JSON.parse(localStorage.rhv7||'{"coins":0,"prestige":1,"luck":0,"speed":0,"gain":0,"auto":0,"autoEnabled":false,"best":0,"scans":0,"sales":0,"ach":[],"history":[],"col":[],"daily":0,"last":0,"trait":"None","traitMult":1,"shards":0,"shardsTotal":0,"shardsSpent":0,"prestigeShop":{},"prestigeTree":{},"prestigeMilestones":{}}');
 let current=null;
 
 const now=Date.now();
@@ -480,6 +551,24 @@ function page(id,e){
   document.getElementById(id).classList.add('active');
   document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
   e.classList.add('active');
+}
+
+function prestigeRarityBonus(){
+  let s=g.prestigeShop;
+  return (s.legChance||0)*1 + (s.epicChance||0)*2 + (s.rareChance||0)*0.5 + (g.prestigeTree["A1"]?1:0) + (g.prestigeTree["C4"]?5:0);
+}
+function prestigeProfitBonus(){
+  let s=g.prestigeShop;
+  let base=(s.coinGain||0)*5 + (s.offerBonus||0)*10;
+  if(g.prestigeTree["C1"]) base+=10;
+  if(g.prestigeTree["C3"]) base+=20;
+  return base;
+}
+function prestigeAutoBonus(){
+  let s=g.prestigeShop;
+  let base=(s.autoSpeed||0)*10;
+  if(g.prestigeTree["B1"]) base+=10;
+  return base;
 }
 
 function update(){
@@ -523,22 +612,52 @@ function update(){
     </div>`;
   });
 
+  // Prestige stats
+  prestigeLevel.textContent = g.prestige;
+  prestigeLevel2.textContent = g.prestige;
+  prestigeMult.textContent = g.prestige;
+  shards.textContent = g.shards;
+  shards2.textContent = g.shards;
+  shardsTotal.textContent = g.shardsTotal;
+  shardsSpent.textContent = g.shardsSpent;
+  prestigeRarityBonusEl.textContent = prestigeRarityBonus().toFixed(1);
+  prestigeProfitBonusEl.textContent = prestigeProfitBonus().toFixed(1);
+  prestigeAutoBonusEl.textContent = prestigeAutoBonus().toFixed(1);
+  prestigeMilestonesCount.textContent = Object.keys(g.prestigeMilestones).filter(k=>g.prestigeMilestones[k]).length;
+
+  renderPrestigeShop();
+  renderPrestigeTree();
+  renderPrestigeMilestones();
+
   save();
 }
 
 function rarity(){
-  let r=Math.random()*100-g.luck*2;
-  if(r<2)return["Legendary",1500];
-  if(r<10)return["Epic",500];
-  if(r<30)return["Rare",150];
+  let base=Math.random()*100;
+  base -= g.luck*2;
+  base -= prestigeRarityBonus();
+  if(base<2)return["Legendary",1500];
+  if(base<10)return["Epic",500];
+  if(base<30)return["Rare",150];
   return["Common",50];
 }
 
 function mutation(){
   let r=Math.random();
+  let unlockedCosmic = g.prestigeShop.cosmic || g.prestigeTree["A2"] || g.prestigeMilestones["10"];
+  let unlockedVoid = g.prestigeShop.void || g.prestigeMilestones["50"];
+  let unlockedRadiant = g.prestigeShop.radiant || g.prestigeTree["A5"];
+  let unlockedGreedMut = g.prestigeShop.greedyMut || g.prestigeTree["C5"];
+
   if(r<.02)return"golden";
   if(r<.04)return"rainbow";
   if(r<.05)return"corrupted";
+
+  if(unlockedCosmic && r<.07)return"cosmic";
+  if(unlockedVoid && r<.09)return"void";
+  if(unlockedRadiant && r<.11)return"radiant";
+  if(unlockedGreedMut && r<.13)return"greedmut";
+
   return"";
 }
 
@@ -556,8 +675,15 @@ function scan(){
       scanning=false;
       let [r,v]=rarity();
       let m=mutation();
-      let mult=m=="golden"?5:m=="rainbow"?10:m=="corrupted"?20:1;
-      let mutText = m ? m.charAt(0).toUpperCase()+m.slice(1)+" " : "";
+      let mult=1;
+      if(m=="golden")mult=5;
+      else if(m=="rainbow")mult=10;
+      else if(m=="corrupted")mult=20;
+      else if(m=="cosmic")mult=15;
+      else if(m=="void")mult=25;
+      else if(m=="radiant")mult=10;
+      else if(m=="greedmut")mult=20;
+      let mutText = m ? m.toUpperCase()+" " : "";
       g.col.push({r,v:v*mult,i:imgs[Math.floor(Math.random()*imgs.length)],m,lvl:1});
       g.scans++;
       if(g.scans>=1&&!g.ach.includes("First Scan"))g.ach.push("First Scan");
@@ -571,7 +697,8 @@ function scan(){
 function buildOffer(){
   let idx=Math.floor(Math.random()*g.col.length);
   let item=g.col[idx];
-  let offer=Math.floor(item.v*(0.5+Math.random()*2)*(1+g.gain*.2)*g.prestige);
+  let gainMult = 1 + (g.gain*0.2) + (prestigeProfitBonus()/100);
+  let offer=Math.floor(item.v*(0.5+Math.random()*2)*gainMult*g.prestige);
   current={idx,offer};
   buyerName.textContent=buyers[Math.floor(Math.random()*buyers.length)];
   let q=offer<item.v?"Bad":offer<item.v*1.5?"Fair":offer<item.v*2?"Great":"Amazing";
@@ -652,11 +779,21 @@ function up(k,c){
   update();
 }
 
-function prestige(){
+function doPrestige(){
   if(g.coins<10000){
     notify("💰 You need 10,000 coins to prestige");
     return;
   }
+  let shardsGain = 5 + g.prestige;
+  if(g.prestige>=5) shardsGain+=2;
+  if(g.prestige>=10) shardsGain+=3;
+  if(g.prestige>=25) shardsGain+=5;
+  if(g.prestige>=50) shardsGain+=8;
+  if(g.prestige>=100) shardsGain+=12;
+
+  g.shards += shardsGain;
+  g.shardsTotal += shardsGain;
+
   g.coins=0;
   g.col=[];
   g.luck=0;
@@ -665,7 +802,9 @@ function prestige(){
   g.auto=0;
   g.autoEnabled=false;
   g.prestige++;
-  notify("🌟 Prestige increased to x"+g.prestige);
+
+  notify("🌟 Prestige "+g.prestige+" reached! Gained "+shardsGain+" shards.");
+  checkPrestigeMilestones();
   update();
 }
 
@@ -693,13 +832,22 @@ function rollTrait() {
   let trait = "None";
   let mult = 1;
 
-  if (r < 1) { trait = "GODLIKE"; mult = 5; }
+  let prestigePool = g.prestigeTree["C4"] || g.prestigeShop.prestigeTraits;
+
+  if (prestigePool && r < 2) { trait = "Ascended"; mult = 4; }
+  else if (prestigePool && r < 5) { trait = "Warped"; mult = 1; }
+  else if (prestigePool && r < 9) { trait = "Greed"; mult = 1; }
+  else if (prestigePool && r < 13) { trait = "Divine"; mult = 1; }
+  else if (r < 1) { trait = "GODLIKE"; mult = 5; }
   else if (r < 5) { trait = "Insane"; mult = 3; }
   else if (r < 15) { trait = "Strong"; mult = 2; }
   else if (r < 40) { trait = "Decent"; mult = 1.5; }
   else { trait = "Weak"; mult = 1.2; }
 
   g.trait = trait;
+  if(trait==="Ascended") mult=4;
+  if(trait==="Greed") mult=3;
+  if(trait==="Divine") mult=2;
   g.traitMult = mult;
 
   notify("✨ New Trait: <b>" + trait + "</b> (" + mult + "x)");
@@ -717,9 +865,172 @@ function toggleAuto(){
   update();
 }
 
+/* PRESTIGE SHOP / TREE / MILESTONES */
+
+const prestigeShopDefs = [
+  {id:"legChance", name:"+1% Legendary Chance", cost:5},
+  {id:"epicChance", name:"+2% Epic Chance", cost:5},
+  {id:"rareChance", name:"+5% Rare Chance", cost:5},
+  {id:"cosmic", name:"Unlock Cosmic Mutation", cost:10},
+  {id:"void", name:"Unlock Void Mutation", cost:15},
+  {id:"radiant", name:"Unlock Radiant Mutation", cost:12},
+  {id:"greedyMut", name:"Unlock Greed Mutation", cost:15},
+  {id:"autoSpeed", name:"Auto Scan +10%", cost:5},
+  {id:"offerBonus", name:"+10% Buyer Offers", cost:8},
+  {id:"coinGain", name:"+5% Coin Gain", cost:8},
+  {id:"prestigeTraits", name:"Unlock Prestige Trait Pool", cost:12}
+];
+
+const prestigeTreeDefs = [
+  {id:"A1", path:"Rarity", name:"+1% Legendary", cost:5, req:null},
+  {id:"A2", path:"Rarity", name:"Unlock Cosmic", cost:8, req:"A1"},
+  {id:"A3", path:"Rarity", name:"+10% Base Value", cost:10, req:"A2"},
+  {id:"A4", path:"Rarity", name:"Legendary Level Faster", cost:10, req:"A3"},
+  {id:"A5", path:"Rarity", name:"Unlock Radiant", cost:12, req:"A4"},
+
+  {id:"B1", path:"Automation", name:"Auto Scan +10%", cost:5, req:null},
+  {id:"B2", path:"Automation", name:"Auto Sell", cost:10, req:"B1"},
+  {id:"B3", path:"Automation", name:"Auto Buyer Reroll", cost:10, req:"B2"},
+  {id:"B4", path:"Automation", name:"Instant Scan", cost:12, req:"B3"},
+  {id:"B5", path:"Automation", name:"Hyper Auto Mode", cost:15, req:"B4"},
+
+  {id:"C1", path:"Profit", name:"+10% Coin Gain", cost:5, req:null},
+  {id:"C2", path:"Profit", name:"+1 Trait Slot (visual)", cost:8, req:"C1"},
+  {id:"C3", path:"Profit", name:"+20% Buyer Offers", cost:10, req:"C2"},
+  {id:"C4", path:"Profit", name:"Prestige Traits Unlocked", cost:12, req:"C3"},
+  {id:"C5", path:"Profit", name:"Greed Mutation Unlocked", cost:15, req:"C4"}
+];
+
+const prestigeMilestoneDefs = [
+  {id:"5", level:5, name:"Neon Pulse Theme & Gold Borders"},
+  {id:"10", level:10, name:"Cosmic Mutation & Galactic Trader"},
+  {id:"25", level:25, name:"Warp Scan & Relic Videos"},
+  {id:"50", level:50, name:"Void Mutation & Ascended Traits"},
+  {id:"100", level:100, name:"Ascension Theme & Hyper Auto Mode"}
+];
+
+function renderPrestigeShop(){
+  const c=document.getElementById("prestigeShop");
+  c.innerHTML="";
+  prestigeShopDefs.forEach(def=>{
+    const owned = g.prestigeShop[def.id]||0;
+    const div=document.createElement("div");
+    div.className="shop-item";
+    div.innerHTML=`
+      <div class="shop-item-header">
+        <span>${def.name}</span>
+        <span>${owned>0?"Lv."+owned:""}</span>
+      </div>
+      <div>Cost: ${def.cost} shards</div>
+      <button class="btn" style="padding:4px 10px;font-size:14px;margin-top:4px" onclick="buyPrestigeShop('${def.id}')">Buy</button>
+    `;
+    c.appendChild(div);
+  });
+}
+
+function buyPrestigeShop(id){
+  const def=prestigeShopDefs.find(x=>x.id===id);
+  if(!def)return;
+  if(g.shards<def.cost){
+    notify("❗ Not enough shards");
+    return;
+  }
+  g.shards-=def.cost;
+  g.shardsSpent+=def.cost;
+  g.prestigeShop[id]=(g.prestigeShop[id]||0)+1;
+  notify("💠 Prestige Shop: "+def.name+" purchased");
+  update();
+}
+
+function renderPrestigeTree(){
+  const c=document.getElementById("prestigeTree");
+  c.innerHTML="";
+  ["Rarity","Automation","Profit"].forEach(path=>{
+    const title=document.createElement("div");
+    title.style.fontWeight="700";
+    title.style.margin="4px 0";
+    title.textContent=path+" Path";
+    c.appendChild(title);
+    prestigeTreeDefs.filter(x=>x.path===path).forEach(def=>{
+      const unlocked = !!g.prestigeTree[def.id];
+      const reqOk = !def.req || g.prestigeTree[def.req];
+      const div=document.createElement("div");
+      div.className="tree-node "+(unlocked?"unlocked":(reqOk?"":"locked"));
+      div.innerHTML=`
+        <div><b>${def.name}</b></div>
+        <div>Cost: ${def.cost} shards</div>
+        ${def.req?`<div>Requires: ${def.req}</div>`:""}
+        <button class="btn" style="padding:4px 10px;font-size:14px;margin-top:4px" onclick="buyTreeNode('${def.id}')">${unlocked?"Owned":"Unlock"}</button>
+      `;
+      c.appendChild(div);
+    });
+  });
+}
+
+function buyTreeNode(id){
+  const def=prestigeTreeDefs.find(x=>x.id===id);
+  if(!def)return;
+  if(g.prestigeTree[id]){
+    notify("Already unlocked");
+    return;
+  }
+  if(def.req && !g.prestigeTree[def.req]){
+    notify("Requirement not met");
+    return;
+  }
+  if(g.shards<def.cost){
+    notify("❗ Not enough shards");
+    return;
+  }
+  g.shards-=def.cost;
+  g.shardsSpent+=def.cost;
+  g.prestigeTree[id]=true;
+  notify("🌿 Skill Tree: "+def.name+" unlocked");
+  update();
+}
+
+function renderPrestigeMilestones(){
+  const c=document.getElementById("prestigeMilestones");
+  c.innerHTML="";
+  prestigeMilestoneDefs.forEach(def=>{
+    const unlocked = g.prestige>=def.level;
+    if(unlocked && !g.prestigeMilestones[def.id]){
+      g.prestigeMilestones[def.id]=true;
+      notify("🏅 Prestige Milestone "+def.level+" reached: "+def.name);
+    }
+    const div=document.createElement("div");
+    div.className="milestone-item "+(unlocked?"unlocked":"");
+    div.innerHTML=`
+      <div class="milestone-label">Prestige ${def.level}</div>
+      <div>${def.name}</div>
+      <div>Status: ${unlocked?"Unlocked":"Locked"}</div>
+    `;
+    c.appendChild(div);
+  });
+}
+
+function checkPrestigeMilestones(){
+  prestigeMilestoneDefs.forEach(def=>{
+    if(g.prestige>=def.level && !g.prestigeMilestones[def.id]){
+      g.prestigeMilestones[def.id]=true;
+      notify("🏅 Prestige Milestone "+def.level+" reached: "+def.name);
+    }
+  });
+}
+
 setInterval(()=>{
-  if(g.auto === 1 && g.autoEnabled && !scanning) scan();
+  let baseInterval=2500;
+  let autoBonus=prestigeAutoBonus();
+  baseInterval = baseInterval * (1 - autoBonus/100);
+  if(g.prestigeTree["B5"] || g.prestigeMilestones["100"]) baseInterval=1000;
+  if(g.auto === 1 && g.autoEnabled && !scanning){
+    scan();
+  }
 },2500);
+
+const prestigeRarityBonusEl=document.getElementById("prestigeRarityBonus");
+const prestigeProfitBonusEl=document.getElementById("prestigeProfitBonus");
+const prestigeAutoBonusEl=document.getElementById("prestigeAutoBonus");
 
 update();
 </script>
