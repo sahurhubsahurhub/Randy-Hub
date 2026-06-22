@@ -493,6 +493,33 @@ for(let i=0;i<45;i++){
 --------------------------------------------------------- */
 
 function defaultSave(){
+  return {
+    coins:0,
+    prestige:1,
+    luck:0,
+    speed:0,
+    gain:0,
+    auto:0,
+    autoEnabled:false,
+    best:0,
+    scans:0,
+    sales:0,
+    ach:[],
+    history:[],
+    col:[],
+    daily:0,
+    last:0,
+    trait:"None",
+    traitMult:1,
+    shards:0,
+    shardsTotal:0,
+    shardsSpent:0,
+    prestigeShop:{},
+    prestigeTree:{},
+    prestigeMilestones:{}
+  };
+}
+
 /* =========================================================
    ENTERPRISE-GRADE SAVE MIGRATION ENGINE
    Prevents ALL progress loss for ALL players, forever.
@@ -628,34 +655,7 @@ function loadSave() {
 --------------------------------------------------------- */
 
 let g = loadSave();
-
-  return {
-    coins:0,
-    prestige:1,
-    luck:0,
-    speed:0,
-    gain:0,
-    auto:0,
-    autoEnabled:false,
-    best:0,
-    scans:0,
-    sales:0,
-    ach:[],
-    history:[],
-    col:[],
-    daily:0,
-    last:0,
-    trait:"None",
-    traitMult:1,
-    shards:0,
-    shardsTotal:0,
-    shardsSpent:0,
-    prestigeShop:{},
-    prestigeTree:{},
-    prestigeMilestones:{}
-  };
-}
-
+  
 let g;
 try{
   g = localStorage.rhv7 ? JSON.parse(localStorage.rhv7) : defaultSave();
