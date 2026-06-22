@@ -334,6 +334,16 @@ header{
 .tree-node.unlocked{border-color:var(--o);box-shadow:0 0 10px #ff980040}
 .milestone-item.unlocked{border-color:var(--o);box-shadow:0 0 10px #ff980040}
 .milestone-label{font-weight:700}
+
+/* BADGE (market buffs) */
+.badge{
+  display:inline-block;
+  padding:6px 10px;
+  margin:4px;
+  border-radius:999px;
+  background:#222;
+  font-size:14px;
+}
 </style>
 </head>
 <body>
@@ -486,10 +496,24 @@ for(let i=0;i<45;i++){
   </div>
 </div>
 
-<div id
-  <script>
+<!-- Overlay + Buyer Modal + Notifications -->
+<div id="overlay" class="overlay">Scanning For Buyers.</div>
+
+<div id="modal" class="modal">
+  <div class="box">
+    <h2 id="buyerName"></h2>
+    <div id="offerBox"></div>
+    <button class="btn" onclick="accept()">Accept</button>
+    <button class="btn" onclick="reroll()">Find Another Buyer</button>
+    <button class="btn" onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<div id="notifyContainer"></div>
+
+<script>
 /* ---------------------------------------------------------
-   AUTO-REPAIR SAVE SYSTEM
+   BASE SAVE SHAPE
 --------------------------------------------------------- */
 
 function defaultSave(){
@@ -522,17 +546,10 @@ function defaultSave(){
 
 /* =========================================================
    ENTERPRISE-GRADE SAVE MIGRATION ENGINE
-   Prevents ALL progress loss for ALL players, forever.
-   Versioned, schema-driven, auto-repairing, future-proof.
 ========================================================= */
 
-/* ------------------------------
-   1. Define the canonical schema
------------------------------- */
-
 const SAVE_SCHEMA = {
-  version: 3,   // bump this when you add new fields
-
+  version: 3,
   coins: 0,
   prestige: 1,
   luck: 0,
@@ -548,30 +565,21 @@ const SAVE_SCHEMA = {
   col: [],
   daily: 0,
   last: 0,
-
   trait: "None",
   traitMult: 1,
-
   shards: 0,
   shardsTotal: 0,
   shardsSpent: 0,
-
   prestigeShop: {},
   prestigeTree: {},
   prestigeMilestones: {}
 };
 
-/* -----------------------------------------
-   2. Deep merge utility (repairs structures)
------------------------------------------ */
-
 function deepMerge(target, schema) {
   for (let key in schema) {
     if (!(key in target)) {
-      // Missing field → repair it
       target[key] = JSON.parse(JSON.stringify(schema[key]));
     } else {
-      // If both sides are objects → merge recursively
       if (typeof schema[key] === "object" && !Array.isArray(schema[key]) && schema[key] !== null) {
         if (typeof target[key] !== "object" || Array.isArray(target[key]) || target[key] === null) {
           target[key] = JSON.parse(JSON.stringify(schema[key]));
@@ -584,51 +592,30 @@ function deepMerge(target, schema) {
   return target;
 }
 
-/* ---------------------------------------------------------
-   3. Migration steps for older versions (future-proof)
---------------------------------------------------------- */
-
 const MIGRATIONS = {
   1: (save) => {
-    // Example: version 1 → 2 migration
     if (!save.trait) save.trait = "None";
     if (!save.traitMult) save.traitMult = 1;
   },
-
   2: (save) => {
-    // Example: version 2 → 3 migration
     if (!save.shards) save.shards = 0;
     if (!save.shardsTotal) save.shardsTotal = 0;
     if (!save.shardsSpent) save.shardsSpent = 0;
   }
 };
 
-/* ---------------------------------------------------------
-   4. Apply migrations in order until schema version reached
---------------------------------------------------------- */
-
 function runMigrations(save) {
   let v = save.version || 1;
-
   while (v < SAVE_SCHEMA.version) {
-    if (MIGRATIONS[v]) {
-      console.log(`Migrating save from v${v} → v${v+1}`);
-      MIGRATIONS[v](save);
-    }
+    if (MIGRATIONS[v]) MIGRATIONS[v](save);
     v++;
   }
-
   save.version = SAVE_SCHEMA.version;
   return save;
 }
 
-/* ---------------------------------------------------------
-   5. Load + validate + repair + migrate save
---------------------------------------------------------- */
-
 function loadSave() {
   let save;
-
   try {
     save = JSON.parse(localStorage.rhv7);
     if (!save || typeof save !== "object") throw "Invalid save";
@@ -637,42 +624,15 @@ function loadSave() {
     save = JSON.parse(JSON.stringify(SAVE_SCHEMA));
   }
 
-  // Deep repair missing fields
   save = deepMerge(save, SAVE_SCHEMA);
-
-  // Run version migrations
   save = runMigrations(save);
 
-  // Save repaired version
   localStorage.rhv7 = JSON.stringify(save);
-
   console.log("Save loaded + validated + migrated successfully");
   return save;
 }
 
-/* ---------------------------------------------------------
-   6. Use the migration loader instead of JSON.parse
---------------------------------------------------------- */
-
 let g = loadSave();
-  
-let g;
-try{
-  g = localStorage.rhv7 ? JSON.parse(localStorage.rhv7) : defaultSave();
-}catch(e){
-  g = defaultSave();
-  localStorage.rhv7 = JSON.stringify(g);
-}
-
-/* AUTO-REPAIR FOR OLD SAVES */
-if (!g.prestigeShop) g.prestigeShop = {};
-if (!g.prestigeTree) g.prestigeTree = {};
-if (!g.prestigeMilestones) g.prestigeMilestones = {};
-if (typeof g.trait === "undefined") g.trait = "None";
-if (typeof g.traitMult === "undefined") g.traitMult = 1;
-if (typeof g.shards === "undefined") g.shards = 0;
-if (typeof g.shardsTotal === "undefined") g.shardsTotal = 0;
-if (typeof g.shardsSpent === "undefined") g.shardsSpent = 0;
 
 /* ---------------------------------------------------------
    PASSIVE OFFLINE EARNINGS
@@ -684,6 +644,27 @@ if(g.last){
   g.coins += mins * 5 * g.prestige;
 }
 g.last = now;
+
+/* ---------------------------------------------------------
+   STATIC DATA
+--------------------------------------------------------- */
+
+const imgs = [
+  "https://picsum.photos/seed/randy1/400/250",
+  "https://picsum.photos/seed/randy2/400/250",
+  "https://picsum.photos/seed/randy3/400/250",
+  "https://picsum.photos/seed/randy4/400/250",
+  "https://picsum.photos/seed/randy5/400/250"
+];
+
+const buyers = [
+  "Neon Trader",
+  "Galactic Collector",
+  "Void Broker",
+  "Meme Lord",
+  "Corporate Sponsor",
+  "Shadow Client"
+];
 
 /* ---------------------------------------------------------
    DOM BINDINGS
@@ -791,7 +772,6 @@ function rarity(){
   let base = Math.random() * 100;
   base -= g.luck * 2;
 
-  // prestige rarity bonus added in Part 3
   base -= (g.prestigeShop.legChance||0)*1;
   base -= (g.prestigeShop.epicChance||0)*2;
   base -= (g.prestigeShop.rareChance||0)*0.5;
@@ -1045,7 +1025,7 @@ function toggleAuto(){
 }
 
 /* ---------------------------------------------------------
-   PRESTIGE TRIGGER (FULL SYSTEM IN PART 3)
+   PRESTIGE TRIGGER
 --------------------------------------------------------- */
 
 function doPrestige(){
@@ -1069,90 +1049,10 @@ function doPrestige(){
   g.prestige++;
 
   notify("🌟 Prestige "+g.prestige+" reached! +"+shardsGain+" shards");
+  checkPrestigeMilestones();
   update();
 }
 
-/* ---------------------------------------------------------
-   UPDATE UI
---------------------------------------------------------- */
-
-function update(){
-  coinsEl.textContent = Math.floor(g.coins);
-  videosEl.textContent = g.col.length;
-  prestigeEl.textContent = g.prestige;
-  bestEl.textContent = g.best;
-
-  luckEl.textContent = g.luck * 2 + "%";
-  luckBonusEl.textContent = g.luck * 2;
-  speedDisplayEl.textContent = g.speed * 5 + "%";
-  gainDisplayEl.textContent = g.gain * 20 + "%";
-
-  s1El.textContent = g.scans;
-  s2El.textContent = g.sales;
-  s3El.textContent = g.best;
-
-  buyerRepEl.textContent = buyers.join(" • ");
-  salesEl.innerHTML = g.history.slice(-15).reverse().join("<br>") || "None";
-  achievementsEl.textContent = g.ach.join(", ") || "None";
-
-  let leg = g.col.filter(x=>x.r=="Legendary").length;
-  setbonusEl.textContent = leg * 5;
-
-  traitNameEl.textContent = g.trait;
-  traitMultEl.textContent = g.traitMult;
-
-  autoStatusEl.textContent =
-    g.auto === 1 ? (g.autoEnabled ? "ON" : "OFF") : "Locked";
-
-  autoIndicatorEl.textContent =
-    "AUTO: " + (g.auto===1 && g.autoEnabled ? "ON" : "OFF");
-
-  autoIndicatorEl.className =
-    g.auto===1 && g.autoEnabled ? "on" : "";
-
-  cardsEl.innerHTML = "";
-  g.col.forEach(v=>{
-    cardsEl.innerHTML += `
-      <div class="card ${v.r.toLowerCase()} ${v.m}">
-        <img src="${v.i}">
-        <b>${v.m ? v.m.toUpperCase()+" " : ""}${v.r}</b><br>
-        💰${v.v}<br>⭐ Lv.${v.lvl}
-      </div>`;
-  });
-
-  /* Prestige stats (shop/tree/milestones filled in Part 3) */
-  prestigeLevelEl.textContent = g.prestige;
-  prestigeLevel2El.textContent = g.prestige;
-  prestigeMultEl.textContent = g.prestige;
-
-  shardsEl.textContent = g.shards;
-  shards2El.textContent = g.shards;
-  shardsTotalEl.textContent = g.shardsTotal;
-  shardsSpentEl.textContent = g.shardsSpent;
-
-  save();
-}
-
-/* ---------------------------------------------------------
-   AUTO SCAN LOOP
---------------------------------------------------------- */
-
-function autoScanLoop(){
-  if(g.auto===1 && g.autoEnabled && !scanning){
-    scan();
-  }
-  setTimeout(autoScanLoop, 2500);
-}
-
-setTimeout(autoScanLoop, 2500);
-
-/* ---------------------------------------------------------
-   INITIAL UPDATE
---------------------------------------------------------- */
-
-update();
-</script>
-<script>
 /* ---------------------------------------------------------
    PRESTIGE DEFINITIONS
 --------------------------------------------------------- */
@@ -1354,6 +1254,8 @@ function buyTreeNode(id){
 function renderPrestigeMilestones(){
   prestigeMilestonesEl.innerHTML = "";
 
+  let unlockedCount = 0;
+
   prestigeMilestoneDefs.forEach(def=>{
     const unlocked = g.prestige >= def.level;
 
@@ -1361,6 +1263,8 @@ function renderPrestigeMilestones(){
       g.prestigeMilestones[def.id] = true;
       notify("🏅 Prestige Milestone "+def.level+" reached: "+def.name);
     }
+
+    if(unlocked) unlockedCount++;
 
     const div = document.createElement("div");
     div.className = "milestone-item " + (unlocked ? "unlocked" : "");
@@ -1373,6 +1277,8 @@ function renderPrestigeMilestones(){
 
     prestigeMilestonesEl.appendChild(div);
   });
+
+  prestigeMilestonesCountEl.textContent = unlockedCount;
 }
 
 function checkPrestigeMilestones(){
@@ -1413,25 +1319,79 @@ function autoScanLoop(){
 setTimeout(autoScanLoop, 2500);
 
 /* ---------------------------------------------------------
-   FINAL UPDATE
+   UPDATE UI
+--------------------------------------------------------- */
+
+function update(){
+  coinsEl.textContent = Math.floor(g.coins);
+  videosEl.textContent = g.col.length;
+  prestigeEl.textContent = g.prestige;
+  bestEl.textContent = g.best;
+
+  luckEl.textContent = g.luck * 2 + "%";
+  luckBonusEl.textContent = g.luck * 2;
+  speedDisplayEl.textContent = g.speed * 5 + "%";
+  gainDisplayEl.textContent = g.gain * 20 + "%";
+
+  s1El.textContent = g.scans;
+  s2El.textContent = g.sales;
+  s3El.textContent = g.best;
+
+  buyerRepEl.textContent = buyers.join(" • ");
+  salesEl.innerHTML = g.history.slice(-15).reverse().join("<br>") || "None";
+  achievementsEl.textContent = g.ach.join(", ") || "None";
+
+  let leg = g.col.filter(x=>x.r=="Legendary").length;
+  setbonusEl.textContent = leg * 5;
+
+  traitNameEl.textContent = g.trait;
+  traitMultEl.textContent = g.traitMult;
+
+  autoStatusEl.textContent =
+    g.auto === 1 ? (g.autoEnabled ? "ON" : "OFF") : "Locked";
+
+  autoIndicatorEl.textContent =
+    "AUTO: " + (g.auto===1 && g.autoEnabled ? "ON" : "OFF");
+
+  autoIndicatorEl.className =
+    g.auto===1 && g.autoEnabled ? "on" : "";
+
+  cardsEl.innerHTML = "";
+  g.col.forEach(v=>{
+    cardsEl.innerHTML += `
+      <div class="card ${v.r.toLowerCase()} ${v.m}">
+        <img src="${v.i}">
+        <b>${v.m ? v.m.toUpperCase()+" " : ""}${v.r}</b><br>
+        💰${v.v}<br>⭐ Lv.${v.lvl}
+      </div>`;
+  });
+
+  prestigeLevelEl.textContent = g.prestige;
+  prestigeLevel2El.textContent = g.prestige;
+  prestigeMultEl.textContent = g.prestige;
+
+  shardsEl.textContent = g.shards;
+  shards2El.textContent = g.shards;
+  shardsTotalEl.textContent = g.shardsTotal;
+  shardsSpentEl.textContent = g.shardsSpent;
+
+  prestigeRarityBonusEl.textContent = prestigeRarityBonus();
+  prestigeProfitBonusEl.textContent = prestigeProfitBonus();
+  prestigeAutoBonusEl.textContent = prestigeAutoBonus();
+
+  renderPrestigeShop();
+  renderPrestigeTree();
+  renderPrestigeMilestones();
+
+  save();
+}
+
+/* ---------------------------------------------------------
+   INITIAL UPDATE
 --------------------------------------------------------- */
 
 update();
 </script>
-<!-- Overlay + Buyer Modal + Notifications (HTML tail) -->
-<div id="overlay" class="overlay">Scanning For Buyers.</div>
-
-<div id="modal" class="modal">
-  <div class="box">
-    <h2 id="buyerName"></h2>
-    <div id="offerBox"></div>
-    <button class="btn" onclick="accept()">Accept</button>
-    <button class="btn" onclick="reroll()">Find Another Buyer</button>
-    <button class="btn" onclick="closeModal()">Close</button>
-  </div>
-</div>
-
-<div id="notifyContainer"></div>
 
 </body>
 </html>
