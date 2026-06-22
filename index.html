@@ -185,6 +185,10 @@ header{
 @keyframes rainbow{to{filter:hue-rotate(360deg)}}
 .corrupted{animation:shake .4s infinite}
 @keyframes shake{50%{transform:translateX(2px)}}
+.cosmic{box-shadow:0 0 18px #7f00ff}
+.void{box-shadow:0 0 18px #0000ff}
+.radiant{box-shadow:0 0 18px #ffd700}
+.greedmut{box-shadow:0 0 18px #00ff00}
 
 /* BUTTONS */
 .btn{
@@ -716,6 +720,7 @@ function findBuyer(){
     notify("❗ Collect videos first");
     return;
   }
+  scanning = true; // prevent auto-scan during buyer search
   overlay.style.display="flex";
   let d=1;
   let anim=setInterval(()=>{
@@ -753,6 +758,7 @@ function accept(){
 
 function closeModal(){
   modal.style.display="none";
+  scanning = false; // allow scan web and auto-scan again
 }
 
 function up(k,c){
@@ -836,8 +842,8 @@ function rollTrait() {
 
   if (prestigePool && r < 2) { trait = "Ascended"; mult = 4; }
   else if (prestigePool && r < 5) { trait = "Warped"; mult = 1; }
-  else if (prestigePool && r < 9) { trait = "Greed"; mult = 1; }
-  else if (prestigePool && r < 13) { trait = "Divine"; mult = 1; }
+  else if (prestigePool && r < 9) { trait = "Greed"; mult = 3; }
+  else if (prestigePool && r < 13) { trait = "Divine"; mult = 2; }
   else if (r < 1) { trait = "GODLIKE"; mult = 5; }
   else if (r < 5) { trait = "Insane"; mult = 3; }
   else if (r < 15) { trait = "Strong"; mult = 2; }
@@ -845,9 +851,6 @@ function rollTrait() {
   else { trait = "Weak"; mult = 1.2; }
 
   g.trait = trait;
-  if(trait==="Ascended") mult=4;
-  if(trait==="Greed") mult=3;
-  if(trait==="Divine") mult=2;
   g.traitMult = mult;
 
   notify("✨ New Trait: <b>" + trait + "</b> (" + mult + "x)");
@@ -1018,15 +1021,24 @@ function checkPrestigeMilestones(){
   });
 }
 
-setInterval(()=>{
-  let baseInterval=2500;
-  let autoBonus=prestigeAutoBonus();
-  baseInterval = baseInterval * (1 - autoBonus/100);
-  if(g.prestigeTree["B5"] || g.prestigeMilestones["100"]) baseInterval=1000;
-  if(g.auto === 1 && g.autoEnabled && !scanning){
+/* AUTO SCAN LOOP FIXED */
+function autoScanLoop() {
+  if (g.auto === 1 && g.autoEnabled && !scanning) {
     scan();
   }
-},2500);
+
+  let baseInterval = 2500;
+  let autoBonus = prestigeAutoBonus();
+  baseInterval = baseInterval * (1 - autoBonus / 100);
+
+  if (g.prestigeTree["B5"] || g.prestigeMilestones["100"]) {
+    baseInterval = 1000;
+  }
+
+  setTimeout(autoScanLoop, baseInterval);
+}
+
+setTimeout(autoScanLoop, 2500);
 
 const prestigeRarityBonusEl=document.getElementById("prestigeRarityBonus");
 const prestigeProfitBonusEl=document.getElementById("prestigeProfitBonus");
