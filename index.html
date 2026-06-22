@@ -527,6 +527,49 @@ if(g.last){
 }
 g.last=now;
 
+/* DOM BINDINGS */
+const coinsEl = document.getElementById("coins");
+const videosEl = document.getElementById("videos");
+const prestigeEl = document.getElementById("prestige");
+const bestEl = document.getElementById("best");
+const luckEl = document.getElementById("luck");
+const scanFill = document.getElementById("scanFill");
+const buyerFill = document.getElementById("buyerFill");
+const cardsEl = document.getElementById("cards");
+const buyerRepEl = document.getElementById("buyerRep");
+const salesEl = document.getElementById("sales");
+const achievementsEl = document.getElementById("achievements");
+const setbonusEl = document.getElementById("setbonus");
+const s1El = document.getElementById("s1");
+const s2El = document.getElementById("s2");
+const s3El = document.getElementById("s3");
+const traitNameEl = document.getElementById("traitName");
+const traitMultEl = document.getElementById("traitMult");
+const autoStatusEl = document.getElementById("autoStatus");
+const autoIndicatorEl = document.getElementById("autoIndicator");
+const overlayEl = document.getElementById("overlay");
+const modalEl = document.getElementById("modal");
+const buyerNameEl = document.getElementById("buyerName");
+const offerBoxEl = document.getElementById("offerBox");
+const notifyContainer = document.getElementById("notifyContainer");
+const luckBonusEl = document.getElementById("luckBonus");
+const speedDisplayEl = document.getElementById("speedDisplay");
+const gainDisplayEl = document.getElementById("gainDisplay");
+const prestigeLevelEl = document.getElementById("prestigeLevel");
+const prestigeLevel2El = document.getElementById("prestigeLevel2");
+const prestigeMultEl = document.getElementById("prestigeMult");
+const shardsEl = document.getElementById("shards");
+const shards2El = document.getElementById("shards2");
+const shardsTotalEl = document.getElementById("shardsTotal");
+const shardsSpentEl = document.getElementById("shardsSpent");
+const prestigeRarityBonusEl = document.getElementById("prestigeRarityBonus");
+const prestigeProfitBonusEl = document.getElementById("prestigeProfitBonus");
+const prestigeAutoBonusEl = document.getElementById("prestigeAutoBonus");
+const prestigeMilestonesCountEl = document.getElementById("prestigeMilestonesCount");
+const prestigeShopEl = document.getElementById("prestigeShop");
+const prestigeTreeEl = document.getElementById("prestigeTree");
+const prestigeMilestonesEl = document.getElementById("prestigeMilestones");
+
 function save(){
   g.last=Date.now();
   localStorage.rhv7=JSON.stringify(g);
@@ -576,40 +619,40 @@ function prestigeAutoBonus(){
 }
 
 function update(){
-  coins.textContent=Math.floor(g.coins);
-  videos.textContent=g.col.length;
-  prestige.textContent=g.prestige;
-  best.textContent=g.best;
+  coinsEl.textContent=Math.floor(g.coins);
+  videosEl.textContent=g.col.length;
+  prestigeEl.textContent=g.prestige;
+  bestEl.textContent=g.best;
 
-  luck.textContent = g.luck * 2 + "%";
-  luckBonus.textContent = g.luck * 2;
-  speedDisplay.textContent = g.speed * 5 + "%";
-  gainDisplay.textContent = (g.gain * 20) + "%";
+  luckEl.textContent = g.luck * 2 + "%";
+  luckBonusEl.textContent = g.luck * 2;
+  speedDisplayEl.textContent = g.speed * 5 + "%";
+  gainDisplayEl.textContent = (g.gain * 20) + "%";
 
-  s1.textContent=g.scans;
-  s2.textContent=g.sales;
-  s3.textContent=g.best;
+  s1El.textContent=g.scans;
+  s2El.textContent=g.sales;
+  s3El.textContent=g.best;
 
-  buyerRep.textContent=buyers.join(" • ");
-  sales.innerHTML=g.history.slice(-15).reverse().join("<br>")||"None";
-  achievements.textContent=g.ach.join(", ")||"None";
+  buyerRepEl.textContent=buyers.join(" • ");
+  salesEl.innerHTML=g.history.slice(-15).reverse().join("<br>")||"None";
+  achievementsEl.textContent=g.ach.join(", ")||"None";
 
   let leg=g.col.filter(x=>x.r=="Legendary").length;
-  setbonus.textContent=leg*5;
+  setbonusEl.textContent=leg*5;
 
-  traitName.textContent = g.trait;
-  traitMult.textContent = g.traitMult;
+  traitNameEl.textContent = g.trait;
+  traitMultEl.textContent = g.traitMult;
 
-  autoStatus.textContent = g.auto === 1
+  autoStatusEl.textContent = g.auto === 1
     ? (g.autoEnabled ? "ON" : "OFF")
     : "Locked";
 
-  autoIndicator.textContent = "AUTO: " + (g.auto === 1 && g.autoEnabled ? "ON" : "OFF");
-  autoIndicator.className = g.auto === 1 && g.autoEnabled ? "on" : "";
+  autoIndicatorEl.textContent = "AUTO: " + (g.auto === 1 && g.autoEnabled ? "ON" : "OFF");
+  autoIndicatorEl.className = g.auto === 1 && g.autoEnabled ? "on" : "";
 
-  cards.innerHTML="";
+  cardsEl.innerHTML="";
   g.col.forEach(v=>{
-    cards.innerHTML+=`<div class="card ${v.r.toLowerCase()} ${v.m}">
+    cardsEl.innerHTML+=`<div class="card ${v.r.toLowerCase()} ${v.m}">
       <img src="${v.i}">
       <b>${v.m?v.m.toUpperCase()+" ":""}${v.r}</b><br>
       💰${v.v}<br>⭐ Lv.${v.lvl}
@@ -617,17 +660,17 @@ function update(){
   });
 
   // Prestige stats
-  prestigeLevel.textContent = g.prestige;
-  prestigeLevel2.textContent = g.prestige;
-  prestigeMult.textContent = g.prestige;
-  shards.textContent = g.shards;
-  shards2.textContent = g.shards;
-  shardsTotal.textContent = g.shardsTotal;
-  shardsSpent.textContent = g.shardsSpent;
+  prestigeLevelEl.textContent = g.prestige;
+  prestigeLevel2El.textContent = g.prestige;
+  prestigeMultEl.textContent = g.prestige;
+  shardsEl.textContent = g.shards;
+  shards2El.textContent = g.shards;
+  shardsTotalEl.textContent = g.shardsTotal;
+  shardsSpentEl.textContent = g.shardsSpent;
   prestigeRarityBonusEl.textContent = prestigeRarityBonus().toFixed(1);
   prestigeProfitBonusEl.textContent = prestigeProfitBonus().toFixed(1);
   prestigeAutoBonusEl.textContent = prestigeAutoBonus().toFixed(1);
-  prestigeMilestonesCount.textContent = Object.keys(g.prestigeMilestones).filter(k=>g.prestigeMilestones[k]).length;
+  prestigeMilestonesCountEl.textContent = Object.keys(g.prestigeMilestones).filter(k=>g.prestigeMilestones[k]).length;
 
   renderPrestigeShop();
   renderPrestigeTree();
@@ -704,9 +747,9 @@ function buildOffer(){
   let gainMult = 1 + (g.gain*0.2) + (prestigeProfitBonus()/100);
   let offer=Math.floor(item.v*(0.5+Math.random()*2)*gainMult*g.prestige);
   current={idx,offer};
-  buyerName.textContent=buyers[Math.floor(Math.random()*buyers.length)];
+  buyerNameEl.textContent=buyers[Math.floor(Math.random()*buyers.length)];
   let q=offer<item.v?"Bad":offer<item.v*1.5?"Fair":offer<item.v*2?"Great":"Amazing";
-  offerBox.innerHTML = `
+  offerBoxEl.innerHTML = `
     <img src="${item.i}" style="width:100%">
     <p>Rarity: ${item.r}</p>
     <p>Base Value: ${item.v}</p>
@@ -721,10 +764,10 @@ function findBuyer(){
     return;
   }
   scanning = true; // prevent auto-scan during buyer search
-  overlay.style.display="flex";
+  overlayEl.style.display="flex";
   let d=1;
   let anim=setInterval(()=>{
-    overlay.textContent="Scanning For Buyers"+".".repeat(d=d%3+1);
+    overlayEl.textContent="Scanning For Buyers"+".".repeat(d=d%3+1);
   },300);
   let p=0;
   let t=setInterval(()=>{
@@ -734,9 +777,9 @@ function findBuyer(){
       clearInterval(t);
       clearInterval(anim);
       buyerFill.style.width="0%";
-      overlay.style.display="none";
+      overlayEl.style.display="none";
       buildOffer();
-      modal.style.display="flex";
+      modalEl.style.display="flex";
     }
   },35);
 }
@@ -757,7 +800,7 @@ function accept(){
 }
 
 function closeModal(){
-  modal.style.display="none";
+  modalEl.style.display="none";
   scanning = false; // allow scan web and auto-scan again
 }
 
@@ -913,8 +956,7 @@ const prestigeMilestoneDefs = [
 ];
 
 function renderPrestigeShop(){
-  const c=document.getElementById("prestigeShop");
-  c.innerHTML="";
+  prestigeShopEl.innerHTML="";
   prestigeShopDefs.forEach(def=>{
     const owned = g.prestigeShop[def.id]||0;
     const div=document.createElement("div");
@@ -927,7 +969,7 @@ function renderPrestigeShop(){
       <div>Cost: ${def.cost} shards</div>
       <button class="btn" style="padding:4px 10px;font-size:14px;margin-top:4px" onclick="buyPrestigeShop('${def.id}')">Buy</button>
     `;
-    c.appendChild(div);
+    prestigeShopEl.appendChild(div);
   });
 }
 
@@ -946,14 +988,13 @@ function buyPrestigeShop(id){
 }
 
 function renderPrestigeTree(){
-  const c=document.getElementById("prestigeTree");
-  c.innerHTML="";
+  prestigeTreeEl.innerHTML="";
   ["Rarity","Automation","Profit"].forEach(path=>{
     const title=document.createElement("div");
     title.style.fontWeight="700";
     title.style.margin="4px 0";
     title.textContent=path+" Path";
-    c.appendChild(title);
+    prestigeTreeEl.appendChild(title);
     prestigeTreeDefs.filter(x=>x.path===path).forEach(def=>{
       const unlocked = !!g.prestigeTree[def.id];
       const reqOk = !def.req || g.prestigeTree[def.req];
@@ -965,7 +1006,7 @@ function renderPrestigeTree(){
         ${def.req?`<div>Requires: ${def.req}</div>`:""}
         <button class="btn" style="padding:4px 10px;font-size:14px;margin-top:4px" onclick="buyTreeNode('${def.id}')">${unlocked?"Owned":"Unlock"}</button>
       `;
-      c.appendChild(div);
+      prestigeTreeEl.appendChild(div);
     });
   });
 }
@@ -993,8 +1034,7 @@ function buyTreeNode(id){
 }
 
 function renderPrestigeMilestones(){
-  const c=document.getElementById("prestigeMilestones");
-  c.innerHTML="";
+  prestigeMilestonesEl.innerHTML="";
   prestigeMilestoneDefs.forEach(def=>{
     const unlocked = g.prestige>=def.level;
     if(unlocked && !g.prestigeMilestones[def.id]){
@@ -1008,7 +1048,7 @@ function renderPrestigeMilestones(){
       <div>${def.name}</div>
       <div>Status: ${unlocked?"Unlocked":"Locked"}</div>
     `;
-    c.appendChild(div);
+    prestigeMilestonesEl.appendChild(div);
   });
 }
 
@@ -1039,10 +1079,6 @@ function autoScanLoop() {
 }
 
 setTimeout(autoScanLoop, 2500);
-
-const prestigeRarityBonusEl=document.getElementById("prestigeRarityBonus");
-const prestigeProfitBonusEl=document.getElementById("prestigeProfitBonus");
-const prestigeAutoBonusEl=document.getElementById("prestigeAutoBonus");
 
 update();
 </script>
